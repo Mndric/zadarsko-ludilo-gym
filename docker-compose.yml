@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    container_name: ludilo_db_container
+    environment:
+      POSTGRES_DB: ludilo_db
+      POSTGRES_USER: ludilo_user
+      POSTGRES_PASSWORD: ludilo_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
