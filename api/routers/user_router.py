@@ -1,14 +1,35 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
-from core.database import get_db  # Pazi: sad je u core!
-from schemas.user import UserCreate, UserOut
+from core.database import get_db  
 from services.user_service import UserService
+from schemas.user import UserCreate, UserOut
 from repositories.user_repository import UserRepository
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-@router.post("/register", response_model=UserOut)
-async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
+def get_user_service(db: AsyncSession = Depends(get_db)):
     repo = UserRepository(db)
-    service = UserService(repo)
+    return UserService(repo)
+
+@router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+async def register(
+    user_in: UserCreate, 
+    service: UserService = Depends(get_user_service)
+):
+    """
+    Registracija novog korisnika. 
+    Lozinka se hashira unutar servisa.
+    """
     return await service.register_user(user_in)
+
+@router.post("/login")
+async def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    service: UserService = Depends(get_user_service)
+):
+    """
+    Prijava korisnika i generiranje JWT tokena.
+    OAuth2PasswordRequestForm očekuje 'username' (što je kod tebe email) i 'password'.
+    """
+    return await service.login_user(form_data.username, form_data.password)
