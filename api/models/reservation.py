@@ -9,8 +9,8 @@ class Reservation(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    training_id = Column(Integer, ForeignKey("trainings.id"), nullable=False)
+    equipment_id = Column(Integer, ForeignKey("equipment.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="reservations")
-    training = relationship("Training", back_populates="reservations")
+    equipment = relationship("Equipment", back_populates="reservations")
