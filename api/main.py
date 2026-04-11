@@ -1,11 +1,13 @@
 from fastapi import FastAPI
-# Provjeri putanju: mapa routers, pa datoteka user_router
 from routers.user_router import router as user_router
+from routers.training_router import router as training_router
+
 
 app = FastAPI(title="Zadarsko Ludilo Gym")
 
-app.include_router(user_router, prefix="/auth", tags=["Authentication"])
+app.include_router(user_router, tags=["Authentication"])
+app.include_router(training_router)
 
 @app.get("/")
 async def root():
-    return {"message": "Sustav Zadarsko Ludilo Gym je pokrenut!"}
+    return {"message": "Dobrodošli u Zadarsko Ludilo Gym!"}

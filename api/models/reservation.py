@@ -1,0 +1,16 @@
+from sqlalchemy import Column, Integer, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
+from datetime import datetime
+from core.database import Base
+
+class Reservation(Base):
+    __tablename__ = "reservations"
+    __table_args__ = {'extend_existing': True}
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    training_id = Column(Integer, ForeignKey("trainings.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="reservations")
+    training = relationship("Training", back_populates="reservations")
