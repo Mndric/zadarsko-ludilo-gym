@@ -7,8 +7,7 @@ class EquipmentBase(BaseModel):
     quantity: int = Field(..., gt=0)
 
 class EquipmentCreate(EquipmentBase):
-    name: str
-    quantity: int
+    pass
 
 class EquipmentUpdate(BaseModel):
     name: Optional[str] = None
@@ -18,6 +17,10 @@ class EquipmentOut(EquipmentBase):
     id: int
     class Config:
         from_attributes = True
+
+class ReservationCreate(BaseModel):
+    equipment_id: int
+    reservation_date: datetime
 
 class ReservationOut(BaseModel):
     id: int

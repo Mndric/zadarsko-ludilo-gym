@@ -1,8 +1,9 @@
 from fastapi import HTTPException, status
 from repositories.training_repository import TrainingRepository
-from models.user import Reservation, User  # Dodala si User ovdje za provjeru role
+from models.user import Reservation, User
 from datetime import datetime
 from sqlalchemy import select
+from schemas.training import ReservationCreate
 
 class TrainingService:
     def __init__(self, repo: TrainingRepository):
@@ -14,13 +15,19 @@ class TrainingService:
             raise HTTPException(status_code=400, detail="Već imaš aktivnu članarinu!")
         return await self.repo.activate_membership(user_id)
 
-    async def process_reservation(self, user_id: int, equipment_id: int):
+    async def process_reservation(self, user_id: int, reservation_data: ReservationCreate):
       
         result = await self.repo.db.execute(select(User).where(User.id == user_id))
         user = result.scalar_one_or_none()
 
         if not user:
             raise HTTPException(status_code=404, detail="Korisnik nije pronađen!")
+
+        if reservation_data.reservation_date.replace(tzinfo=None) < datetime.utcnow():
+            raise HTTPException(
+                status_code=400, 
+                detail="Ne možete rezervirati termin u prošlosti!"
+            )
 
         if not user.is_admin:  
             membership = await self.repo.get_membership(user_id)
@@ -30,7 +37,7 @@ class TrainingService:
                     detail="Pristup odbijen. Nemaš aktivnu članarinu!"
                 )
 
-        equipment = await self.repo.get_equipment_by_id(equipment_id)
+        equipment = await self.repo.get_equipment_by_id(reservation_data.equipment_id)
         if not equipment:
             raise HTTPException(status_code=404, detail="Sprava ne postoji!")
         
@@ -38,10 +45,11 @@ class TrainingService:
             raise HTTPException(status_code=400, detail="Sva oprema ovog tipa je trenutno zauzeta!")
 
         equipment.quantity -= 1
+        
         new_res = Reservation(
             user_id=user_id, 
-            equipment_id=equipment_id, 
-            reservation_date=datetime.utcnow()  
+            equipment_id=reservation_data.equipment_id, 
+            reservation_date=reservation_data.reservation_date
         )
         
         return await self.repo.create_reservation(new_res)
