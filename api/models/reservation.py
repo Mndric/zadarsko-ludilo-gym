@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, String
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from core.database import Base
@@ -10,7 +10,9 @@ class Reservation(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     equipment_id = Column(Integer, ForeignKey("equipment.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
+    
+    created_at = Column("reservation_date", DateTime, default=datetime.utcnow)
+    
+    status = Column(String, default="active")  
     user = relationship("User", back_populates="reservations")
     equipment = relationship("Equipment", back_populates="reservations")
