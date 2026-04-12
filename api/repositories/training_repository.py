@@ -57,3 +57,11 @@ class TrainingRepository:
             await self.db.commit()
             return True
         return False
+    async def get_reservation_by_id(self, res_id: int):
+        return await self.db.get(Reservation, res_id)
+
+    async def update_reservation_date(self, reservation: Reservation, new_date: datetime):
+        reservation.reservation_date = new_date
+        await self.db.commit()
+        await self.db.refresh(reservation)
+        return reservation

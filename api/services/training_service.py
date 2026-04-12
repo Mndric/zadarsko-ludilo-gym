@@ -53,3 +53,28 @@ class TrainingService:
         )
         
         return await self.repo.create_reservation(new_res)
+    # ... (tvoj postojeći kod u TrainingService) ...
+
+    async def get_reservation_details(self, reservation_id: int, user_id: int):
+        reservation = await self.repo.get_reservation_by_id(reservation_id)
+        if not reservation:
+            raise HTTPException(status_code=404, detail="Rezervacija nije pronađena")
+        
+        # Ključni dio za obranu: Provjera ownershipa (vlasništva)
+        if reservation.user_id != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, 
+                detail="Nemate pristup tuđoj rezervaciji"
+            )
+        return reservation
+
+    async def update_reservation(self, reservation_id: int, user_id: int, new_date: datetime):
+        reservation = await self.get_reservation_details(reservation_id, user_id)
+        
+        if new_date.replace(tzinfo=None) < datetime.utcnow():
+            raise HTTPException(
+                status_code=400, 
+                detail="Novi datum ne može biti u prošlosti"
+            )
+        
+        return await self.repo.update_reservation_date(reservation, new_date)

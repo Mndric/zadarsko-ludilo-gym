@@ -6,6 +6,7 @@ from core.security import get_current_user, check_admin
 from schemas.training import EquipmentCreate, EquipmentOut, EquipmentUpdate, ReservationOut, MembershipOut, ReservationCreate
 from repositories.training_repository import TrainingRepository
 from services.training_service import TrainingService
+from datetime import datetime
 
 router = APIRouter(prefix="/gym", tags=["Zadarsko Ludilo - Teretana"])
 
@@ -51,3 +52,26 @@ async def activate_membership(user=Depends(get_current_user), db: AsyncSession =
     repo = TrainingRepository(db)
     service = TrainingService(repo)
     return await service.buy_membership(user.id)
+
+@router.get("/reservations/{id}", response_model=ReservationOut)
+async def get_single_reservation(
+    id: int, 
+    db: AsyncSession = Depends(get_db), 
+    user=Depends(get_current_user)
+):
+    """Vraća detalje jedne rezervacije uz provjeru ownershipa."""
+    repo = TrainingRepository(db)
+    service = TrainingService(repo)
+    return await service.get_reservation_details(id, user.id)
+
+@router.put("/reservations/{id}", response_model=ReservationOut)
+async def change_reservation(
+    id: int, 
+    new_date: datetime, 
+    db: AsyncSession = Depends(get_db), 
+    user=Depends(get_current_user)
+):
+    """Omogućuje korisniku promjenu datuma njegove rezervacije."""
+    repo = TrainingRepository(db)
+    service = TrainingService(repo)
+    return await service.update_reservation(id, user.id, new_date)
