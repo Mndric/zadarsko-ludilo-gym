@@ -53,7 +53,6 @@ class TrainingService:
         )
         
         return await self.repo.create_reservation(new_res)
-    # ... (tvoj postojeći kod u TrainingService) ...
 
     async def get_reservation_details(self, reservation_id: int, user_id: int):
         reservation = await self.repo.get_reservation_by_id(reservation_id)
