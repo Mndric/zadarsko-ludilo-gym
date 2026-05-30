@@ -1,6 +1,6 @@
 <template>
   <div class="page-container">
-    <h1>Ovo je home stranica</h1>
+    <h1>Ovo je admin stranica</h1>
   </div>
 </template>
 
