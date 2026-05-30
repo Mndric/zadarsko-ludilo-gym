@@ -59,7 +59,6 @@ class TrainingService:
         if not reservation:
             raise HTTPException(status_code=404, detail="Rezervacija nije pronađena")
         
-        # Ključni dio za obranu: Provjera ownershipa (vlasništva)
         if reservation.user_id != user_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, 

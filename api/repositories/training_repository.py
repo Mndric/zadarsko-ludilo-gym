@@ -26,7 +26,6 @@ class TrainingRepository:
         return result.scalar_one_or_none()
 
     async def activate_membership(self, user_id: int):
-    # Dodajemo 'type="Standard"' jer tvoja baza ne dopušta prazno polje
         new_membership = Membership( user_id=user_id, type="Standard", start_date=datetime.utcnow())
         self.db.add(new_membership)
         await self.db.commit()

@@ -7,7 +7,6 @@ class UserService:
         self.user_repo = user_repo
 
     async def register_user(self, user_data):
-        # Provjera postoji li već korisnik
         existing = await self.user_repo.get_by_email(user_data.email)
         if existing:
             raise HTTPException(
