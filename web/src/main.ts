@@ -1,14 +1,30 @@
-import './assets/main.css'
-
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-
 import App from './App.vue'
 import router from './router'
+import { useAuthStore } from './stores/auth'
 
-const app = createApp(App)
+import './styles/globalno.css'
 
-app.use(createPinia())
-app.use(router)
+async function bootApp(): Promise<void> {
+  const app = createApp(App)
+  const pinia = createPinia()
+  
+  app.use(pinia)
 
-app.mount('#app')
+  // BOOT: Obnovi stanje korisnika iz tokena prije učitavanja routera
+  if (localStorage.getItem('access_token')) {
+    const authStore = useAuthStore(pinia)
+    try {
+      await authStore.fetchCurrentUser()
+    } catch {
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('user')
+    }
+  }
+
+  app.use(router)
+  app.mount('#app')
+}
+
+bootApp()
