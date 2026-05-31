@@ -1,0 +1,27 @@
+:root {
+  /* Pozadina — potpuno crna */
+  --boja-pozadina:  #0a0a0a;
+  --boja-povrsina:  #141414;
+  --boja-rub:       #2a2a2a;
+ 
+  /* Tekst */
+  --boja-tekst:       #f0f0f0;
+  --boja-tekst-mute:  #777777;
+ 
+  /* Akcent — ŽUTA */
+  --boja-akcent:  #FFD600;
+  --boja-akcent-hover: #FFE033;
+ 
+  /* Semantika */
+  --boja-uspjeh:  #4CAF50;
+  --boja-greska:  #f44336;
+  --boja-info:    #2196F3;
+ 
+  /* Tipografija */
+  --font-display: 'Big Shoulders Display', sans-serif;
+  --font-body:    'JetBrains Mono', monospace;
+ 
+  /* Animacije */
+  --tranzicija: 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --tranzicija-spora: 300ms ease;
+}

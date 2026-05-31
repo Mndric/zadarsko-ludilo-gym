@@ -1,0 +1,29 @@
+@import './tokens.css';
+@import './reset.css';
+ 
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+ 
+.muted { color: var(--boja-tekst-mute); }
+.akcent { color: var(--boja-akcent); }
+.uspjeh { color: var(--boja-uspjeh); }
+.greska-tekst { color: var(--boja-greska); font-size: 0.75rem; }
+ 
+/* Spinner animacija */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--boja-rub);
+  border-top-color: var(--boja-akcent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
