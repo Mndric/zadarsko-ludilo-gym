@@ -4,7 +4,7 @@ from typing import Optional, List
 
 class EquipmentBase(BaseModel):
     name: str = Field(..., min_length=2, max_length=50)
-    quantity: int = Field(..., gt=0)
+    quantity: int = Field(..., ge=0)
 
 class EquipmentCreate(EquipmentBase):
     pass

@@ -64,3 +64,6 @@ class TrainingRepository:
         await self.db.commit()
         await self.db.refresh(reservation)
         return reservation
+    async def get_all_reservations(self):
+        result = await self.db.execute(select(Reservation))
+        return result.scalars().all()

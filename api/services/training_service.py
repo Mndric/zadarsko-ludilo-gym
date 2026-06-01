@@ -16,14 +16,18 @@ class TrainingService:
         return await self.repo.activate_membership(user_id)
 
     async def process_reservation(self, user_id: int, reservation_data: ReservationCreate):
-      
+        
+        # Ovdje uzimamo datum, čistimo zonu i spremamo ga u POTPUNO NOVU varijablu 'cisti_datum'
+        cisti_datum = reservation_data.reservation_date.replace(tzinfo=None)
+
         result = await self.repo.db.execute(select(User).where(User.id == user_id))
         user = result.scalar_one_or_none()
 
         if not user:
             raise HTTPException(status_code=404, detail="Korisnik nije pronađen!")
 
-        if reservation_data.reservation_date.replace(tzinfo=None) < datetime.utcnow():
+        # Koristimo novu varijablu za provjeru prošlosti
+        if cisti_datum < datetime.utcnow():
             raise HTTPException(
                 status_code=400, 
                 detail="Ne možete rezervirati termin u prošlosti!"
@@ -46,10 +50,11 @@ class TrainingService:
 
         equipment.quantity -= 1
         
+        # KLJUČNI KORAK: Ovdje bazi šaljemo našu čistu varijablu 'cisti_datum'
         new_res = Reservation(
             user_id=user_id, 
             equipment_id=reservation_data.equipment_id, 
-            reservation_date=reservation_data.reservation_date
+            reservation_date=cisti_datum  # <--- Proslijedi lokalnu varijablu, ne reservation_data!
         )
         
         return await self.repo.create_reservation(new_res)
@@ -69,7 +74,9 @@ class TrainingService:
     async def update_reservation(self, reservation_id: int, user_id: int, new_date: datetime):
         reservation = await self.get_reservation_details(reservation_id, user_id)
         
-        if new_date.replace(tzinfo=None) < datetime.utcnow():
+        new_date = new_date.replace(tzinfo=None)
+
+        if new_date < datetime.utcnow():
             raise HTTPException(
                 status_code=400, 
                 detail="Novi datum ne može biti u prošlosti"

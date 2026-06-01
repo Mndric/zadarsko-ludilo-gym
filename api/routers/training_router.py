@@ -39,6 +39,12 @@ async def my_reservations(user=Depends(get_current_user), db: AsyncSession = Dep
     repo = TrainingRepository(db)
     return await repo.get_user_reservations(user.id)
 
+@router.get("/admin/all-reservations", response_model=List[ReservationOut])
+async def list_all_reservations(db: AsyncSession = Depends(get_db)):
+    """Vraća sve rezervacije u sustavu."""
+    repo = TrainingRepository(db)
+    return await repo.get_all_reservations()
+
 @router.delete("/reservations/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def cancel_reservation(id: int, user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     repo = TrainingRepository(db)

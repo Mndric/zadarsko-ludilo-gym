@@ -42,3 +42,4 @@ async def get_me(current_user: User = Depends(get_current_user)):
     Ispunjava uvjet: Endpoint /auth/me koji vraća trenutnog korisnika.
     """
     return current_user
+
