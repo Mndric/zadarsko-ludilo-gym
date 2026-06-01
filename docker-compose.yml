@@ -2,6 +2,7 @@ services:
   db:
     image: postgres:16
     container_name: ludilo_db_container
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ludilo_db
       POSTGRES_USER: ludilo_user
@@ -10,6 +11,29 @@ services:
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ludilo_user -d ludilo_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: ludilo_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   pgdata:
+  pgadmin_data:
