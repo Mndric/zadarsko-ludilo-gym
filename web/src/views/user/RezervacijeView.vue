@@ -9,7 +9,7 @@ import type { Rezervacija } from '@/types/rezervacija'
 type Stanje = 'ucitavanje' | 'greska' | 'prazno' | 'spremno'
  
 const obavijesti  = useObavijestiStore()
-const rezervacije = ref<Rezervacija[]>([])
+const rezervacije = ref<any[]>([]) // Privremeno stavljeno na any[] ako tip 'Rezervacija' još nema 'equipment' definiran
 const stanje      = ref<Stanje>('ucitavanje')
 const porukaGreske = ref('')
 const brisemoId   = ref<number | null>(null)
@@ -40,8 +40,17 @@ async function otkazi(id: number): Promise<void> {
   }
 }
  
+// POPRAVLJENO FORMATIRANJE VREMENA
 function formatirajDatum(d: string): string {
-  return new Date(d).toLocaleString('hr-HR')
+  if (!d) return ''
+  const utcString = d.endsWith('Z') ? d : d + 'Z'
+  return new Date(utcString).toLocaleString('hr-HR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
  
 onMounted(ucitaj)
@@ -51,18 +60,15 @@ onMounted(ucitaj)
   <div class="pogled">
     <h1>Moje rezervacije</h1>
  
-    <!-- Loading -->
     <div v-if="stanje === 'ucitavanje'" class="stanje-ucitavanje">
       <div class="spinner"></div>
       <span class="muted">Učitavanje rezervacija...</span>
     </div>
  
-    <!-- Error -->
     <div v-else-if="stanje === 'greska'" class="stanje-greska">
       ⚠ {{ porukaGreske }}
     </div>
  
-    <!-- Empty -->
     <div v-else-if="stanje === 'prazno'" class="stanje-prazno">
       <span>📅</span>
       <p>Nemate aktivnih rezervacija.</p>
@@ -71,7 +77,6 @@ onMounted(ucitaj)
       </RouterLink>
     </div>
  
-    <!-- Data -->
     <table v-else class="tablica">
       <thead>
         <tr>
@@ -84,7 +89,7 @@ onMounted(ucitaj)
       <tbody>
         <tr v-for="r in rezervacije" :key="r.id">
           <td class="muted">{{ r.id }}</td>
-          <td>Oprema #{{ r.equipment_id }}</td>
+          <td>{{ r.equipment?.name ?? `Oprema #${r.equipment_id}` }}</td>
           <td>{{ formatirajDatum(r.reservation_date) }}</td>
           <td>
             <Gumb

@@ -38,10 +38,18 @@ async function kupiClanarinu(): Promise<void> {
 }
  
 function formatirajDatum(d: string): string {
-  return new Date(d).toLocaleString('hr-HR')
+  if (!d) return ''
+  const utcString = d.endsWith('Z') ? d : d + 'Z'
+  return new Date(utcString).toLocaleString('hr-HR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 </script>
- 
+
 <template>
   <div class="pogled">
     <div class="pozdrav">

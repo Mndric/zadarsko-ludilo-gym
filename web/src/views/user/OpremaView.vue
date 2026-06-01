@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useOpremaStore }     from '@/stores/oprema'
+import { useOpremaStore }      from '@/stores/oprema'
 import { useObavijestiStore } from '@/stores/obavijesti'
+import { useAuthStore }        from '@/stores/auth' // <-- 1. UVOZIMO AUTH STORE
 import { kreirajRezervaciju } from '@/services/gym'
 import { ApiGreska } from '@/services/api'
 import Modal from '@/components/Modal.vue'
@@ -9,6 +10,7 @@ import Gumb  from '@/components/Gumb.vue'
  
 const opremaStore = useOpremaStore()
 const obavijesti  = useObavijestiStore()
+const auth        = useAuthStore() // <-- 2. INICIJALIZIRAMO AUTH STORE
  
 const modalOtvoren     = ref(false)
 const odabranaOpremaId = ref<number | null>(null)
@@ -49,25 +51,21 @@ async function potvrdiRezervaciju(): Promise<void> {
   <div class="pogled">
     <h1>Dostupna oprema</h1>
  
-    <!-- Loading state -->
     <div v-if="opremaStore.ucitava" class="stanje-ucitavanje">
       <div class="spinner"></div>
       <span class="muted">Učitavanje opreme...</span>
     </div>
  
-    <!-- Error state -->
     <div v-else-if="opremaStore.greska" class="stanje-greska">
       {{ opremaStore.greska }}
       <Gumb vrsta="sekundarni" velicina="mali" @click="opremaStore.ucitaj()">Pokušaj ponovo</Gumb>
     </div>
  
-    <!-- Empty state -->
     <div v-else-if="opremaStore.stavke.length === 0" class="stanje-prazno">
       <span>🏋️</span>
       <p>Nema dostupne opreme u teretani.</p>
     </div>
  
-    <!-- Data -->
     <div v-else class="mreza-opreme">
       <div
         v-for="o in opremaStore.stavke"
@@ -81,13 +79,19 @@ async function potvrdiRezervaciju(): Promise<void> {
             {{ o.quantity > 0 ? `${o.quantity} dostupno` : 'Zauzeto' }}
           </span>
         </div>
+
         <Gumb
+          v-if="!auth.user?.is_admin"
           velicina="mali"
           :onemoguceno="o.quantity === 0"
           @click="otvoriModal(o.id)"
         >
           {{ o.quantity > 0 ? 'Rezerviraj' : 'Nedostupno' }}
         </Gumb>
+
+        <div v-else class="admin-pregled-tekst">
+          <span>Pregled (Admin)</span>
+        </div>
       </div>
     </div>
   </div>
@@ -132,4 +136,15 @@ async function potvrdiRezervaciju(): Promise<void> {
 .modal-input:focus { outline: none; border-color: var(--boja-akcent); }
 .spinner { width: 24px; height: 24px; border: 3px solid var(--boja-rub); border-top-color: var(--boja-akcent); border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Stil za natpis kad je admin u pregledu */
+.admin-pregled-tekst {
+  font-size: 0.75rem;
+  color: var(--boja-tekst-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px dashed var(--boja-rub);
+  padding: 0.4rem;
+  text-align: center;
+}
 </style>
